@@ -20,7 +20,7 @@ news_dict = {k:v for k,v in [(str(i)+"gram_dict",dict()) for i in range(2,7)]}
 for i in range(len(news_list)):
     news_list[i] = ''.join(re.findall(u'([\u4e00-\u9fff])',news_list[i]))
 
-#compute tf and idf
+#compute tf and df
 for ind,news in enumerate(news_list):
     appeared_list = [] #store the appeare word to count the df
     for n_gram in range(2,7):
