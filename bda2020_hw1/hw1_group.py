@@ -66,3 +66,5 @@ news_dict = {**gram_dict_2,**gram_dict_3,**gram_dict_4,**gram_dict_5,**gram_dict
 sorted_result = list(map(lambda x:[x[0],x[1][0],x[1][1]],sorted(news_dict.items(), key=lambda x: x[1][0],reverse=True)))
 pd.DataFrame(sorted_result).to_csv('./result/all.csv',index=False,header=False)
 # print(sorted_result[0:10])
+
+
