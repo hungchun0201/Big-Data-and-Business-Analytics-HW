@@ -25,6 +25,7 @@ for i in range(len(news_list)):
     news_list[i] = ''.join(re.findall(u'([\u4e00-\u9fff])',news_list[i]))
 print(list(map(lambda x:len(x),categories)))
 for category_id,category_arr in enumerate(categories):
+    
     news_dict = {k:v for k,v in [(str(i)+"gram_dict",dict()) for i in range(2,7)]}
 
     for ind,val in enumerate(category_arr):
