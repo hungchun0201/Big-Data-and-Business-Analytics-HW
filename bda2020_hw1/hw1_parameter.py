@@ -4,7 +4,7 @@ import re
 
 #Read the file
 total_doc = 90507
-df = pd.read_csv("./result/bonus/full.csv")
+df = pd.read_csv("./result/all.csv")
 tf_all = np.array(list(df.iloc[:,1])) 
 df_all = np.array(list(df.iloc[:,2])) 
 news_dict = {k:v for v, k in enumerate(list(df.iloc[:,0]))}
@@ -13,7 +13,7 @@ catagories = ["信用卡", "匯率", "台灣", "台積電", "日本", "銀行"]
 data_lst = []
 
 for i in range(6):
-    data_lst.append(pd.read_csv("./result/bonus/" + catagories[i] + ".csv"))
+    data_lst.append(pd.read_csv("./result/" + catagories[i] + ".csv"))
 
 token_lst = []
 tf_lst = []
@@ -77,17 +77,19 @@ for i in range(6):
     df_df_chi = pd.DataFrame(list(zip(token_lst[i], df_chi_lst)), columns = ['token', 'df_chi_square'])
     df_lift = pd.DataFrame(list(zip(token_lst[i], lift_lst)), columns = ['token', 'lift'])
 
+    print('Sorting {} parameters'.format(catagories[i]))
     #Sorting
     df_mi = df_mi.sort_values(by = ['MI'], ascending=False)
     df_tf_chi = df_tf_chi.sort_values(by = ['tf_chi_square'], ascending=False)
     df_df_chi = df_df_chi.sort_values(by = ['df_chi_square'], ascending=False)
     df_lift = df_lift.sort_values(by = ['lift'], ascending=False)
 
+    print('Saving {} csv file'.format(catagories[i]))
     #Output
-    output_fpath1 = '{}_MI.csv'.format(catagories[i])
-    output_fpath2 = '{}_tf_chi.csv'.format(catagories[i])
-    output_fpath3 = '{}_df_chi.csv'.format(catagories[i])
-    output_fpath4 = '{}_lift.csv'.format(catagories[i])
+    output_fpath1 = '{}_MI_BL.csv'.format(catagories[i])
+    output_fpath2 = '{}_tf_chi_BL.csv'.format(catagories[i])
+    output_fpath3 = '{}_df_chi_BL.csv'.format(catagories[i])
+    output_fpath4 = '{}_lift_BL.csv'.format(catagories[i])
 
     df_mi.to_csv(output_fpath1, index = False)
     df_tf_chi.to_csv(output_fpath2, index = False)
