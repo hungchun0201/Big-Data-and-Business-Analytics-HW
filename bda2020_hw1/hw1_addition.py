@@ -7,7 +7,8 @@ from multiprocessing import Pool
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 
 
-category_names = ['銀行', '信用卡', '匯率', '台積電', '台灣', '日本']
+# category_names = ['銀行', '信用卡', '匯率', '台積電', '台灣', '日本']
+category_names = ['日本']
 # News_UpperBound = 10
 
 
@@ -63,31 +64,38 @@ def calculate(news, save_name):
 
 
 def main():
-    # Full list
-    if os.path.exists('temp.npy'):
-        print('Loading News...')
-        news = np.load('temp.npy', allow_pickle=True)
-    else:
-        news = read_data()
-        news = cut_news(news)
-        news = np.array([' '.join(article) for article in news])
-        np.save('temp', news)
+    # # Full list
+    # if os.path.exists('temp.npy'):
+    #     print('Loading News...')
+    #     news = np.load('temp.npy', allow_pickle=True)
+    # else:
+    #     news = read_data()
+    #     news = cut_news(news)
+    #     news = np.array([' '.join(article) for article in news])
+    #     np.save('temp', news)
+    #
+    # calculate(news, save_name='full')
 
-    calculate(news, save_name='full')
+    # # Per category
+    # categories = np.load('category.npy', allow_pickle=True)
+    # for i, index_list in enumerate(categories):
+    #     if os.path.exists('{}.npy'.format(category_names[i])):
+    #         print('Loading News...')
+    #         news = np.load('{}.npy'.format(category_names[i]), allow_pickle=True)
+    #     else:
+    #         news = read_data(indexes=index_list)
+    #         news = cut_news(news)
+    #         news = np.array([' '.join(article) for article in news])
+    #         np.save(category_names[i], news)
+    #
+    #     calculate(news, save_name=category_names[i])
 
-    # Per category
-    categories = np.load('category.npy', allow_pickle=True)
-    for i, index_list in enumerate(categories):
-        if os.path.exists('{}.npy'.format(category_names[i])):
-            print('Loading News...')
-            news = np.load('{}.npy'.format(category_names[i]), allow_pickle=True)
-        else:
-            news = read_data(indexes=index_list)
-            news = cut_news(news)
-            news = np.array([' '.join(article) for article in news])
-            np.save(category_names[i], news)
+    print('Loading News...')
+    news = np.load('{}.npy'.format(category_names[0]), allow_pickle=True)
+    print("Length of the News: {}".format(len(news)))
+    print(news[:5])
 
-        calculate(news, save_name=category_names[i])
+    calculate(news, save_name=category_names[0])
 
 
 if __name__ == "__main__":
