@@ -31,7 +31,9 @@ def read_data():
             oper[2] = oper[2][1:]
         check[i][0] = '/'.join(oper)
         check_date_lst.append(check[i][0])
-
+    
+    repeat = np.load('../impdate.npy')
+    g = lambda x:'/'.join([i[1:] if i[0]=='0' else i for i in x.split('-') ])
     f = lambda x:'/'.join([i[1:] if i[0]=='0' else i for i in x.split('/') ])
     def find_nearest_date(date):
         # print('from '+date,end="")
@@ -41,8 +43,6 @@ def read_data():
                 date = '2018/12/28'
             # print(' to '+date)
         return date
-        
-
 
     for idx1, i in enumerate(date_lst):
         for idx2, date_match in enumerate(check):
@@ -54,7 +54,6 @@ def read_data():
                 if check[find][0] == find_nearest_date(i):
                     label_lst.append(check[find][1])
                     break
-    #print(label_lst) 
 
     return vector_lst, label_lst
 
@@ -65,7 +64,7 @@ def train(trainX, trainY):
 
     train_X, valid_X, train_Y, valid_Y = train_test_split(trainX, trainY, test_size=0.2)
     print(np.shape(np.array(train_X)))
-    print(train_Y)
+    #print(train_Y)
     print(np.shape(np.array(train_Y)))
 
     
@@ -82,10 +81,41 @@ def train(trainX, trainY):
     print(matrix)
     np.save('confusion_matrix.npy', matrix)
 
+def read_impdate_data():
+    df = pd.read_csv('../extract_vector/save/main_vector.csv')
+    updown_data = np.load('../result.npy')
+    def f(x): return '/'.join([i[1:] if i[0]
+                               == '0' else i for i in x.split('/')])
+    updown_dict = {f(k): int(v) for k, v in updown_data}
+    train_labels = []
+    train_data = []
+    intense_date = [f(i.replace('-','/')) for i in np.load('../impdate.npy')]
+    
+
+    def find_nearest_date(date):
+        # print('from '+date,end="")
+        while(date not in updown_dict.keys()):
+            date = f((datetime.strptime(date, "%Y/%m/%d") +
+                      timedelta(days=1)).strftime("%Y/%m/%d"))
+            if((datetime.strptime(date, "%Y/%m/%d")-datetime(2018, 12, 28)).total_seconds() > 0):
+                date = '2018/12/28'
+        # print(' to '+date)
+        return date
+    for _, row in df.iterrows():
+        available_date = find_nearest_date(row['post_time'].split()[0])
+        if(updown_dict[available_date]!=0):
+            train_labels.append(updown_dict[available_date])
+            train_data.append([int(i) for i in row['vector'][1:-1].split(', ')])
+            if(available_date in intense_date):
+                train_labels.append(updown_dict[available_date])
+                train_data.append([int(i) for i in row['vector'][1:-1].split(', ')])
+
+    return train_data, train_labels 
     
 
 if __name__ == '__main__':
-    trainX, trainY = read_data()
+    #trainX, trainY = read_data()
+    trainX, trainY = read_impdate_data()
     train(trainX, trainY)
 
 
