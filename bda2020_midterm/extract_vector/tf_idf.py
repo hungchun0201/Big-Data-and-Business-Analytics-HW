@@ -5,12 +5,13 @@ import re
 import jieba
 from multiprocessing import Pool
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
+from datetime import datetime, timedelta
 from tqdm import tqdm
 
 # News_UpperBound = 10
 categories = ['news', 'bbs', 'forum']
-# target_word = '大立光'
-target_word = ''
+target_word = '大立光'
+# target_word = ''
 
 
 def read_csv(data_path):
@@ -31,6 +32,37 @@ def read_csv(data_path):
     for i, row in df.iterrows():
         df.at[i, 'real_content'] = ''.join(re.findall(r'([\u4e00-\u9fff])', row['real_content']))
     return df
+
+
+def find_label(df):
+    print("Finding the labels...")
+    # df = pd.read_csv('../extract_vector/save/main_vector.csv')
+    updown_data = np.load('../result.npy')
+
+    def f(x):
+        return '/'.join([i[1:] if i[0] == '0' else i for i in x.split('/')])
+
+    updown_dict = {f(k): int(v) for k, v in updown_data}
+    train_labels = []
+
+    def find_nearest_date(date):
+        # print('from '+date,end="")
+        while (date not in updown_dict.keys()):
+            date = f((datetime.strptime(date, "%Y/%m/%d") +
+                      timedelta(days=1)).strftime("%Y/%m/%d"))
+            if ((datetime.strptime(date, "%Y/%m/%d") - datetime(2018, 12, 28)).total_seconds() > 0):
+                date = '2018/12/28'
+        # print(' to '+date)
+        return date
+
+    for i, row in df.iterrows():
+        available_date = find_nearest_date(row['post_time'].split()[0])
+        if updown_dict[available_date] != 0:
+            train_labels.append(updown_dict[available_date])
+        else:
+            train_labels.append(0)
+
+    return np.array(train_labels)
 
 
 def cut_news(data):
@@ -66,8 +98,8 @@ def calculate(news, save_name):
     df.to_csv(out_path, index=False)
 
 
-def calculate_baseline(news_list):
-    Quarantine_Threshold = 500
+def calculate_baseline(news_list, save_name):
+    Quarantine_Threshold = 1000
     Delete_Threshold = 0.05
 
     # For 2gram to 6 gram, each of them has a dict.
@@ -117,32 +149,41 @@ def calculate_baseline(news_list):
     # sort the result by tf
     sorted_result = list(
         map(lambda x: [x[0], x[1][0], x[1][1]], sorted(news_dict.items(), key=lambda x: x[1][0], reverse=True)))
-    pd.DataFrame(sorted_result).to_csv('./save/all.csv', index=False, header=False)
+    pd.DataFrame(sorted_result).to_csv('./save/{}.csv'.format(save_name), index=False, header=False)
 
 
 def main():
-    main_df = pd.DataFrame(columns=['post_time', 'real_content'])
-    for c in categories:
-        df = read_csv(data_path="./dataset/{}.csv".format(c))
-        main_df = main_df.append(df[['post_time', 'real_content']], ignore_index=False)
-    print('Total df length: {}'.format(len(main_df)))
+    os.makedirs('save', exist_ok=True)
+    save_path = 'save/main_article.csv'
+    if os.path.exists(save_path):
+        print('Loading {} (with cut data)...'.format(save_path))
+        main_df = pd.read_csv(save_path)
+    else:
+        main_df = pd.DataFrame(columns=['post_time', 'real_content'])
+        for c in categories:
+            df = read_csv(data_path="./dataset/{}.csv".format(c))
+            main_df = main_df.append(df[['post_time', 'real_content']], ignore_index=False)
+        main_df['label'] = find_label(main_df)
+        print('Total df length: {}'.format(len(main_df)))
 
-    calculate_baseline(main_df['real_content'])
+        data = cut_news(np.array(main_df['real_content']))
+        data = np.array([' '.join(article) for article in data])
+        # saving
+        main_df['real_content'] = data
+        print('Saving to {} ...\n'.format(save_path))
+        main_df.to_csv(save_path, index=False)
 
-    # os.makedirs('save', exist_ok=True)
-    # save_path = 'save/full_article.csv'
-    # if os.path.exists(save_path):
-    #     print('Loading cut data from {}...'.format(save_path))
-    #     data = np.array(pd.read_csv(save_path)['real_content'])
-    # else:
-    #     data = cut_news(np.array(main_df['real_content']))
-    #     data = np.array([' '.join(article) for article in data])
-    #     # saving
-    #     print('Saving to {} ...\n'.format(save_path))
-    #     main_df['real_content'] = data
-    #     main_df.to_csv(save_path, index=False)
-    #
-    # calculate(data, save_name='full_tfidf')
+    pos_df = main_df[main_df['label'] == 1]
+    neg_df = main_df[main_df['label'] == -1]
+    print('Length of positive df: {}'.format(len(pos_df)))
+    print('Length of negative df: {}'.format(len(neg_df)))
+
+    # calculate(data, save_name='main_tfidf')
+    calculate(pos_df['real_content'], save_name='main_pos_tfidf')
+    calculate(neg_df['real_content'], save_name='main_neg_tfidf')
+
+    # calculate_baseline(pos_df['real_content'], save_name='main_pos_tfidf_baseline')
+    # calculate_baseline(neg_df['real_content'], save_name='main_neg_tfidf_baseline')
 
 
 if __name__ == "__main__":
