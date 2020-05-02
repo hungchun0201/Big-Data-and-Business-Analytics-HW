@@ -6,6 +6,8 @@ from sklearn.svm import SVC
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix
 
+from sklearn.decomposition import PCA
+
 
 def read_data():
     #Load data
@@ -58,12 +60,16 @@ def read_data():
 
 def train(trainX, trainY):
 
+    #pca = PCA(n_components=250)
+    #trainX = pca.fit_transform(trainX)
+
     train_X, valid_X, train_Y, valid_Y = train_test_split(trainX, trainY, test_size=0.2)
     print(np.shape(np.array(train_X)))
     print(train_Y)
     print(np.shape(np.array(train_Y)))
 
-    model = SVC(gamma='scale',kernel='poly')
+    
+    model = SVC(gamma='scale', kernel='poly')
     model.fit(train_X, train_Y)
     test_Y = model.predict(valid_X)
     print(test_Y)
@@ -74,6 +80,7 @@ def train(trainX, trainY):
 
     matrix = confusion_matrix(valid_Y, test_Y)
     print(matrix)
+    np.save('confusion_matrix.npy', matrix)
 
     
 
