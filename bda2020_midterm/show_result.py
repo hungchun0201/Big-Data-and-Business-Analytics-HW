@@ -1,2 +1,2 @@
 import numpy as np
-print(np.load('result.npy'))
+print(np.load('impdate.npy'))

@@ -9,13 +9,13 @@ from sklearn.metrics import confusion_matrix
 
 def read_data():
     #Load data
-    df_data = pd.read_csv('./extract_vector/save/main_vector.csv')
+    df_data = pd.read_csv('../extract_vector/save/main_vector.csv')
     date_lst = list(i[0:i.find(' ')] for i in df_data.iloc[1:,0])
     vector_lst = list(i[1:-1].split(", ") for i in df_data.iloc[1:, 1])
 
 
     #Load label
-    check = np.load('./result.npy')
+    check = np.load('../result.npy')
 
     #Tag label on every data
     label_lst = []
@@ -62,7 +62,7 @@ def train(trainX, trainY):
     print(np.shape(np.array(train_X)))
     print(np.shape(np.array(train_Y)))
 
-    model = SVC(gamma='auto')
+    model = SVC(gamma='scale',kernel='poly')
     model.fit(train_X, train_Y)
     test_Y = model.predict(valid_X)
     print(test_Y)
