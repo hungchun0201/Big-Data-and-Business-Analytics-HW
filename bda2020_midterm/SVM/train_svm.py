@@ -52,7 +52,7 @@ def read_data():
                 if check[find][0] == find_nearest_date(i):
                     label_lst.append(check[find][1])
                     break
-    print(label_lst) 
+    #print(label_lst) 
 
     return vector_lst, label_lst
 
@@ -60,6 +60,7 @@ def train(trainX, trainY):
 
     train_X, valid_X, train_Y, valid_Y = train_test_split(trainX, trainY, test_size=0.2)
     print(np.shape(np.array(train_X)))
+    print(train_Y)
     print(np.shape(np.array(train_Y)))
 
     model = SVC(gamma='scale',kernel='poly')
