@@ -1,3 +1,4 @@
+import argparse
 import numpy as np
 import pandas as pd
 from sklearn.feature_extraction.text import CountVectorizer
@@ -6,11 +7,22 @@ limit = 1000
 
 
 def main():
-    main_df = pd.read_csv('save/main_article.csv')
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--baseline', '-b', action='store_true')
+    args = parser.parse_args()
+
     # tfidf_df = pd.read_csv('save/main_tfidf.csv')
     # keywords = np.array(tfidf_df['token'][:limit])
-    pos_keywords = np.array(pd.read_csv('save/main_pos_tfidf.csv')['token'])
-    neg_keywords = np.array(pd.read_csv('save/main_neg_tfidf.csv')['token'])
+    if args.baseline:
+        print("Running baseline...")
+        main_df = pd.read_csv('save/main_article_baseline.csv')
+        pos_keywords = np.array(pd.read_csv('save/main_pos_tfidf_baseline.csv')['token'])
+        neg_keywords = np.array(pd.read_csv('save/main_neg_tfidf_baseline.csv')['token'])
+    else:
+        print("Running improved...")
+        main_df = pd.read_csv('save/main_article.csv')
+        pos_keywords = np.array(pd.read_csv('save/main_pos_tfidf.csv')['token'])
+        neg_keywords = np.array(pd.read_csv('save/main_neg_tfidf.csv')['token'])
 
     pos_keywords = np.setdiff1d(pos_keywords, neg_keywords, assume_unique=True)
     neg_keywords = np.setdiff1d(neg_keywords, pos_keywords, assume_unique=True)

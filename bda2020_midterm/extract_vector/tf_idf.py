@@ -3,6 +3,7 @@ import numpy as np
 import os
 import re
 import jieba
+import argparse
 from multiprocessing import Pool
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from datetime import datetime, timedelta
@@ -36,7 +37,6 @@ def read_csv(data_path):
 
 def find_label(df):
     print("Finding the labels...")
-    # df = pd.read_csv('../extract_vector/save/main_vector.csv')
     updown_data = np.load('../result.npy')
 
     def f(x):
@@ -153,8 +153,19 @@ def calculate_baseline(news_list, save_name):
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--baseline', '-b', action='store_true')
+    args = parser.parse_args()
+
     os.makedirs('save', exist_ok=True)
-    save_path = 'save/main_article.csv'
+
+    if args.baseline:
+        print("Running baseline...")
+        save_path = 'save/main_article_baseline.csv'
+    else:
+        print("Running improved...")
+        save_path = 'save/main_article.csv'
+
     if os.path.exists(save_path):
         print('Loading {} (with cut data)...'.format(save_path))
         main_df = pd.read_csv(save_path)
@@ -166,10 +177,11 @@ def main():
         main_df['label'] = find_label(main_df)
         print('Total df length: {}'.format(len(main_df)))
 
-        data = cut_news(np.array(main_df['real_content']))
-        data = np.array([' '.join(article) for article in data])
+        if not args.baseline:
+            data = cut_news(np.array(main_df['real_content']))
+            data = np.array([' '.join(article) for article in data])
+            main_df['real_content'] = data
         # saving
-        main_df['real_content'] = data
         print('Saving to {} ...\n'.format(save_path))
         main_df.to_csv(save_path, index=False)
 
@@ -179,11 +191,12 @@ def main():
     print('Length of negative df: {}'.format(len(neg_df)))
 
     # calculate(data, save_name='main_tfidf')
-    calculate(pos_df['real_content'], save_name='main_pos_tfidf')
-    calculate(neg_df['real_content'], save_name='main_neg_tfidf')
-
-    # calculate_baseline(pos_df['real_content'], save_name='main_pos_tfidf_baseline')
-    # calculate_baseline(neg_df['real_content'], save_name='main_neg_tfidf_baseline')
+    if args.baseline:
+        calculate_baseline(pos_df['real_content'], save_name='main_pos_tfidf_baseline')
+        calculate_baseline(neg_df['real_content'], save_name='main_neg_tfidf_baseline')
+    else:
+        calculate(pos_df['real_content'], save_name='main_pos_tfidf')
+        calculate(neg_df['real_content'], save_name='main_neg_tfidf')
 
 
 if __name__ == "__main__":
