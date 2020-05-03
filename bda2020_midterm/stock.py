@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import statistics
-sigma = 0.025
+sigma = 0
 day = 2
 # company = ['2330 台積電', '2317 鴻海', '2412 中華電', '6505 台塑化', '2454 聯發科', '1301 台塑', '3008 大立光', '2882 國泰金', '1303 南亞', '1326 台化']
 company = '3008 大立光'
@@ -41,7 +41,7 @@ def main():
         print(result)
         
     result = np.array(result)
-    np.save('result.npy', result)
+    np.save('result_zero_sigma.npy', result)
 
         
 if __name__ == "__main__":
