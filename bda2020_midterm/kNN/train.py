@@ -5,6 +5,8 @@ from sklearn.neighbors import KNeighborsClassifier
 from datetime import datetime, timedelta
 from sklearn.metrics import confusion_matrix
 from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
+
 
 def read_data():
     df = pd.read_csv('../extract_vector/save/main_vector.csv')
@@ -43,7 +45,11 @@ def train():
     print(np.shape(np.array(train_data)))
 
     train_data = np.array(train_data)
-    pca = PCA(n_components=100,random_state=100)
+
+    scaler = StandardScaler()
+    train_data = scaler.fit_transform(train_data)
+
+    pca = PCA(n_components=50,random_state=100)
     pca.fit(train_data)
     train_data_pca = pca.transform(train_data)
     print("original shape:   ", train_data.shape)
