@@ -120,6 +120,7 @@ def train(train_label, train_data, test_label, test_data, random_state, current_
     np.save('all_label.npy',all_label)
     the_matrix = confusion_matrix(test_label, predict_label)
 
+
     # print(the_matrix)
     acc = np.trace(the_matrix)/np.sum(the_matrix)
     print('{} accuracy: '.format(current_ym), acc)
