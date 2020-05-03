@@ -20,7 +20,7 @@ for i in predict:
             tp+=1
         elif(predict_value==-1):
             tn+=1
-    else:
+    elif(ground_true==-1):
         if(predict_value==1):
             fp+=1
         elif(predict_value==-1):
