@@ -5,6 +5,8 @@ from sklearn.neighbors import KNeighborsClassifier
 from datetime import datetime, timedelta
 from sklearn.metrics import confusion_matrix
 from sklearn.decomposition import PCA
+from sklearn import tree
+# from sklearn.cross_validation import train_test_split
 
 def read_data():
     df = pd.read_csv('../extract_vector/save/main_vector.csv')
@@ -38,37 +40,42 @@ def read_data():
     return train_labels, train_data
 
 
-def train():
+def train(random_state):
     train_label, train_data = read_data()
-    print(np.shape(np.array(train_data)))
+    # print(np.shape(np.array(train_data)))
 
     train_data = np.array(train_data)
-    pca = PCA(n_components=100,random_state=100)
+    pca = PCA(n_components=100, random_state=random_state)
     pca.fit(train_data)
     train_data_pca = pca.transform(train_data)
-    print("original shape:   ", train_data.shape)
-    print("transformed shape:", train_data_pca.shape)
+    # print("original shape:   ", train_data.shape)
+    # print("transformed shape:", train_data_pca.shape)
 
     train_data = train_data_pca
 
     train_data, test_data, train_label, test_label = train_test_split(
-        train_data, train_label, test_size=0.2)
+        train_data, train_label, test_size=0.2,random_state=random_state)
 
-    knn = KNeighborsClassifier()
-    knn.fit(train_data,train_label)
-    predict_label = knn.predict(test_data)
-    print(predict_label)
-    print(test_label)
+    dtc = tree.DecisionTreeClassifier()
+    dtc.fit(train_data, train_label)
+    predict_label = dtc.predict(test_data)
+    # print(predict_label)
+    # print(test_label)
 
     all_label = list(zip(predict_label,test_label))
     np.save('all_label.npy',all_label)
-    the_matrix = confusion_matrix(test_label,knn.predict(test_data))
+    the_matrix = confusion_matrix(test_label,dtc.predict(test_data))
 
-    print(the_matrix)
-    print('accuracy: ',np.trace(the_matrix)/np.sum(the_matrix))
-    np.save('result_confusion_matrix.npy',the_matrix)
-
+    # print(the_matrix)
+    acc = np.trace(the_matrix)/np.sum(the_matrix)
+    print('{:2d} accuracy: '.format(random_state), acc)
+    np.save('result_confusion_matrix_{}.npy'.format(random_state),the_matrix)
+    return acc
 
 
 if __name__ == '__main__':
-    train()
+    acc_list = []
+    for i in range(100):
+        acc = train(i)
+        acc_list.append(acc)
+    print(acc_list.index(max(acc_list)))

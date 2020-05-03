@@ -80,6 +80,8 @@ def train(trainX, trainY):
     matrix = confusion_matrix(valid_Y, test_Y)
     print(matrix)
     np.save('confusion_matrix.npy', matrix)
+    print("Accuracy : ",np.trace(matrix)/np.sum(matrix))
+
 
 def read_impdate_data():
     df = pd.read_csv('../extract_vector/save/main_vector.csv')
