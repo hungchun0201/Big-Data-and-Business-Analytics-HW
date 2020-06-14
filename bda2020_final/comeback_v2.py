@@ -216,7 +216,7 @@ if __name__ == '__main__':
     # latestcanceled_order = order[(order['Status']=='Finish') & (order['MemberID'].isin(new_cm)) & (order['ShippingType'] == 'SevenEleven')]
     # comeback_order       = order[(order['Status']=='Finish') & (order['MemberID'].isin(new_cm)) & (order['ShippingType'] == 'SevenEleven')]
     print("i : Comeback member sum vs Fail/Cancel/Return sum")
-    print(len(new_cm), len(new_fm))
+    print(len(new_fm), len(new_cm))
 
     
     '''
