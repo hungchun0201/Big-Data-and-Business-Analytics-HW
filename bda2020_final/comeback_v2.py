@@ -202,17 +202,17 @@ if __name__ == '__main__':
     for fm in finished_member:
         if fm not in new_fm:
             new_fm.append(fm)
-    fd_dict = {}
-    for fd in finished_order:
-        ID = fd[0]
-        time = fd[3]
-        code = fd[5]
-        if cm_dict[ID][0] < time:
-            if ID in fd_dict:
-                if fd_dict[ID][0] > time:
-                    fd_dict[ID] = [time, code]
-            else:
-                fd_dict[ID] = [time, code]
+    # fd_dict = {}
+    # for fd in finished_order:
+    #     ID = fd[0]
+    #     time = fd[3]
+    #     code = fd[5]
+    #     if cm_dict[ID][0] < time:
+    #         if ID in fd_dict:
+    #             if fd_dict[ID][0] > time:
+    #                 fd_dict[ID] = [time, code]
+    #         else:
+    #             fd_dict[ID] = [time, code]
     # latestcanceled_order = order[(order['Status']=='Finish') & (order['MemberID'].isin(new_cm)) & (order['ShippingType'] == 'SevenEleven')]
     # comeback_order       = order[(order['Status']=='Finish') & (order['MemberID'].isin(new_cm)) & (order['ShippingType'] == 'SevenEleven')]
     print("i : Comeback member sum vs Fail/Cancel/Return sum")
