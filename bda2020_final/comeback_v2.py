@@ -34,23 +34,17 @@ class RawDataset:
         member_df = pd.read_csv(self.member_csv_path)
         return member_df[['MemberID', *keys]]
 
-    def get_order_info(self, keys, conditions, is_slave=False):
+    def get_order_info(self, keys, is_slave=False):
         """
         :param keys: items to observe from OrderData(Slave).csv (ex. ['TradesDateTime', 'Status'])
         :param is_slave: bool: use slave data or not
         :return: df with the 1st col being MemberID
         """
         if is_slave:
-            csv_path = self.order_slave_csv_path
-        else:
             csv_path = self.order_csv_path
-        print('\treading data')
-        order_df = pd.read_csv(csv_path, dtype={'ChannelDetail': 'str', 'PaymentType': 'str', 'ShippingType': 'str'})
-        # for i in order_df:
-        #     print(i)
-        print('\tparsing conditions')
-        for c in conditions:
-            order_df = order_df[order_df[c[0]] == c[1]]
+        else:
+            csv_path = self.order_slave_csv_path
+        order_df = pd.read_csv(csv_path)
         return order_df[['MemberID', *keys]]
 
     #For Failed/Canceled/Returned Orders
