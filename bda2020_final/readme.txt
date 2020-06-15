@@ -9,3 +9,8 @@ Comeback rate usage:
 **t:team index
 **if data have been stored, -r=True
 **ts: time space between purchase and userRegisteration
+
+Comeback rate modified usage:
+    python3 comeback_v3.py -t=1 -r=False
+**t:team index
+**if data have been stored, -r=True
