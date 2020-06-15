@@ -30,7 +30,7 @@ class RFM_model:
             print("Construct the RFM_model now ......")
             self.construct_RFM_model()
 
-    def construct_RFM_model(self):
+    def construct_RFM_model(self,filename='RFM_team.csv'):
         data = RawDataset().get_order_info(['TradesDateTime', 'TotalPrice'])
         # remove repeat member id
         Member_list = list(set(list(data['MemberID'])))
@@ -54,10 +54,10 @@ class RFM_model:
 
             self.team_df.loc[row['MemberID']]['monetary'] += row['TotalPrice']
 
-        self.team_df.to_csv('RFM_team.csv')
-        self.calculate_team()
+        self.team_df.to_csv(filename)
+        self.calculate_team(filename)
 
-    def calculate_team(self):
+    def calculate_team(self,filename='RFM_team.csv'):
         '''
         Devide the customers.
         team 1 = low R, high frequency, high monetary => Best Customer
@@ -97,7 +97,7 @@ class RFM_model:
                         self.team_df.loc[index,'team'] = 7
                     else:
                         self.team_df.loc[index,'team'] = 8
-        self.team_df.to_csv('RFM_team.csv',index_label=False)
+        self.team_df.to_csv(filename,index_label=False)
         
 
     def get_user_team(self, user_id):
@@ -108,4 +108,4 @@ class RFM_model:
 
 
 if __name__ == '__main__':
-    print(RFM_model().get_user_team('C1n1i3LhlKdws%2BchutttaaIKLQBlMjkT7tChnoB4oEU%3D'))
+    RFM_model().calculate_team()

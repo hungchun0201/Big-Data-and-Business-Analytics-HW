@@ -39,9 +39,9 @@ class RawDataset:
         :return: df with the 1st col being MemberID
         """
         if is_slave:
-            csv_path = self.order_csv_path
-        else:
             csv_path = self.order_slave_csv_path
+        else:
+            csv_path = self.order_csv_path
         order_df = pd.read_csv(csv_path)
         return order_df[['MemberID', *keys]]
 
