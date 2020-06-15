@@ -1,9 +1,13 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib.ticker as mticker
 import os
+import math
+import random
 from tqdm import tqdm
 from raw_dataset import *
+from mpl_toolkits import mplot3d
 
 """
 Usage: 
@@ -41,7 +45,7 @@ class RFM_model:
         self.team_df.loc[:, 'MemberID'] = Member_list
         self.team_df = self.team_df.set_index('MemberID')
         print(self.team_df)
-        for _, row in tqdm(data.iterrows(), total=len(data)):
+        for num, row in tqdm(data.iterrows(), total=len(data)):
             recency = (to_datetime(MAX_DATE) -
                        to_datetime(row['TradesDateTime'].split(' ')[0])).days
             old_recency = self.team_df.loc[row['MemberID']]['recency']
@@ -51,10 +55,14 @@ class RFM_model:
                 self.team_df.loc[row['MemberID']
                                  ]['recency'] = recency if old_recency >= recency else old_recency
             self.team_df.loc[row['MemberID']]['frequency'] += 1
-
-            self.team_df.loc[row['MemberID']]['monetary'] += row['TotalPrice']
+            if row['TotalPrice']>0:
+                self.team_df.loc[row['MemberID']]['monetary'] += row['TotalPrice']
+            # if(num>100):
+            #     break
+        
 
         self.team_df.to_csv(filename)
+        self.team_df.reset_index(inplace=True)
         self.calculate_team(filename)
 
     def calculate_team(self,filename='RFM_team.csv'):
@@ -69,7 +77,7 @@ class RFM_model:
         team 7 = high R, low frequency, high monetary
         team 8 = high R, low frequency, low monetary => Worst Customer
         '''
-        boundaries = [718, 4, 9862]
+        boundaries = [719, 2, 2379]
         if self.team_df.empty:
             self.read_RFM_model()
         self.team_df.set_index('MemberID',inplace=True)
@@ -97,6 +105,7 @@ class RFM_model:
                         self.team_df.loc[index,'team'] = 7
                     else:
                         self.team_df.loc[index,'team'] = 8
+        self.team_df.reset_index(inplace=True)
         self.team_df.to_csv(filename,index_label=False)
         
 
@@ -105,7 +114,40 @@ class RFM_model:
             self.read_RFM_model()
         return self.team_df.loc[user_id]['team']
 
+    def show_results(self):
+        def log_tick_formatter(val, pos=None):
+            return "{:.2e}".format(10**val)
+
+        if self.team_df.empty:
+            self.read_RFM_model()
+        
+        fig = plt.figure()
+        ax = plt.axes(projection="3d")
+        # ax = fig.add_subplot(111, projection='3d_custom')
+        # plt.ylim(1,10)
+        temp = []
+        for i in range(1000):
+            val = random.choice(range(len(self.team_df)))
+            if(self.team_df.loc[val]['monetary']==0 or self.team_df.loc[val]['recency']==0):
+                continue
+            temp.append(val)
+        temp = self.team_df.loc[temp]
+        z_points = list(map(lambda x:math.log10(x),list(temp['monetary'])))
+        x_points = list(map(lambda x:math.log10(x),list(temp['recency'])))
+       
+        y_points = list(map(lambda x:math.log10(x),list(temp['frequency'])))
+        ax.scatter3D(x_points, y_points, z_points, c=z_points, cmap='hsv')
+        # ax.zaxis.set_major_formatter(mticker.FuncFormatter(log_tick_formatter))
+        # ax.xaxis.set_major_formatter(mticker.FuncFormatter(log_tick_formatter))
+        # ax.yaxis.set_major_formatter(mticker.FuncFormatter(log_tick_formatter))
+        ax.set_xlabel('recency(log)')
+        ax.set_ylabel('frequency(log)')
+        ax.set_zlabel('monetary(log)')
+
+
+        plt.show()
+
 
 
 if __name__ == '__main__':
-    RFM_model().calculate_team()
+    RFM_model().show_results()
